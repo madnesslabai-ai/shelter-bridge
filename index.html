@@ -142,7 +142,63 @@
                         <!-- JS会把卡片插在这里，先放一个Loading -->
                         <div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> 正在寻找最急需的基地...</div>
                     </div>
+    <!-- 🐶 狗狗助养专区 -->
+    <section class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">🐶 云助养计划</h2>
+                <p class="text-muted">每月一杯咖啡钱，让它们不再挨饿</p>
+            </div>
+            
+            <div class="row g-4" id="dogs-container">
+                <!-- 这里的卡片会通过 JS 自动生成 -->
+            </div>
+        </div>
+    </section>
 
+    <script>
+        // --- 在原本的 <script> 里添加这段新的 Fetch 代码 ---
+        
+        async function fetchDogs() {
+            // 记得把 TABLE_NAME 改成 'Dogs'，Token 和 BaseID 还是用之前的
+            const DOG_TABLE = 'Dogs'; 
+            
+            try {
+                const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DOG_TABLE}?view=Grid%20view`, {
+                    headers: { Authorization: `Bearer ${API_TOKEN}` }
+                });
+                const data = await response.json();
+                
+                const container = document.getElementById('dogs-container');
+                
+                data.records.forEach(record => {
+                    const f = record.fields;
+                    const imgUrl = f.Photo ? f.Photo[0].url : 'https://placehold.co/400';
+                    
+                    const dogCard = `
+                        <div class="col-md-3 col-6"> <!-- 手机一行2个，电脑一行4个 -->
+                            <div class="dog-card" style="border-radius: 20px;">
+                                <div style="height: 200px; overflow: hidden;">
+                                    <img src="${imgUrl}" style="width:100%; height:100%; object-fit:cover;">
+                                </div>
+                                <div class="card-body text-center">
+                                    <h5 class="fw-bold">${f.Name}</h5>
+                                    <p class="small text-muted" style="height: 40px; overflow: hidden;">${f.Bio || '暂无故事'}</p>
+                                    <a href="${f.SponsorLink}" target="_blank" class="btn btn-primary-custom btn-sm w-100 rounded-pill">
+                                        ❤️ 助养它
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += dogCard;
+                });
+            } catch (err) { console.error(err); }
+        }
+        
+        // 记得运行它
+        fetchDogs();
+    </script>
                     <!-- 助养小卡片 (静态示例) -->
                     <div class="card dog-card mt-3">
                         <div class="card-body p-3">
